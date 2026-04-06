@@ -1,0 +1,16 @@
+services:
+  ytm-daily-drive:
+    build:
+      context: .
+    container_name: ytm-daily-drive
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-America/Chicago}
+      YTM_DAILY_DRIVE_CONFIG: ${YTM_DAILY_DRIVE_CONFIG:-/app/config/settings.yaml}
+      YTM_DAILY_DRIVE_AUTH_FILE: ${YTM_DAILY_DRIVE_AUTH_FILE:-/app/secrets/auth.json}
+      YTMUSIC_OAUTH_CLIENT_ID: ${YTMUSIC_OAUTH_CLIENT_ID:-}
+      YTMUSIC_OAUTH_CLIENT_SECRET: ${YTMUSIC_OAUTH_CLIENT_SECRET:-}
+    volumes:
+      - ./config:/app/config
+      - ./secrets:/app/secrets
+      - ./data:/app/data

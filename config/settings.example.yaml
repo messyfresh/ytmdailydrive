@@ -1,0 +1,31 @@
+auth:
+  method: browser
+  json_path: ../secrets/auth.json
+  brand_account_id:
+
+playlist:
+  name: Daily Drive
+  description: >
+    A Daily Drive-style playlist built from one current-events podcast episode
+    plus the most recent songs from my YouTube Music history.
+  privacy: PRIVATE
+
+news:
+  required: true
+  sources:
+    - name: NPR Up First
+      podcast_id: REPLACE_WITH_YTMUSIC_PODCAST_ID
+    - name: The Journal.
+      podcast_id: REPLACE_WITH_YTMUSIC_PODCAST_ID
+
+songs:
+  count: 4
+  min_results: 3
+  history_limit: 100
+
+scheduler:
+  timezone: America/Chicago
+  cron: "0 6 * * *"
+
+state:
+  path: ../data/state.json

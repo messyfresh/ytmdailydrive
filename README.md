@@ -1,0 +1,84 @@
+# ytm_daily_drive
+
+Build and maintain a `Daily Drive` playlist in YouTube Music with one current-events podcast episode followed by the songs you have listened to most recently.
+
+## How it works
+
+The app uses [`ytmusicapi`](https://ytmusicapi.readthedocs.io/en/latest/) to:
+
+- authenticate to your YouTube Music account
+- read your recent listening history
+- read the newest episode from one of your configured news podcast sources
+- create or update a playlist named `Daily Drive`
+
+The playlist is updated in place. The program keeps a small state file with the playlist ID so it can reuse the same playlist every day instead of deleting and recreating it.
+
+## Repo layout
+
+- `config/settings.example.yaml`: committed example config
+- `config/settings.yaml`: your local runtime config, ignored by git
+- `secrets/auth.json`: your local `ytmusicapi` auth file, ignored by git
+- `data/state.json`: small local state file with the target playlist ID, ignored by git
+
+## Recommended auth mode
+
+Use `browser` auth unless you have a strong reason to use OAuth. It is the simplest path for `ytmusicapi`.
+
+Create the auth file outside git:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install ytmusicapi
+ytmusicapi browser secrets/auth.json
+```
+
+That command will prompt you to paste the request headers copied from an authenticated `music.youtube.com` browser session. See the upstream docs for the exact flow:
+
+- https://ytmusicapi.readthedocs.io/en/latest/setup/browser.html
+
+If you want OAuth instead, set `auth.method: oauth`, provide an OAuth token JSON file, and set:
+
+- `YTMUSIC_OAUTH_CLIENT_ID`
+- `YTMUSIC_OAUTH_CLIENT_SECRET`
+
+## Configure the app
+
+Create your local config:
+
+```bash
+cp config/settings.example.yaml config/settings.yaml
+cp .env.example .env
+```
+
+Then edit `config/settings.yaml` and replace each `podcast_id` placeholder with a real YouTube Music podcast ID.
+
+The `.env` file is optional. Compose will run with defaults if you do not need to override any environment variables.
+
+You can find a podcast ID in YouTube Music by opening the podcast and looking for an ID like `PL...` in the URL. The app tries sources in order and uses the newest available episode from the first source that returns one.
+
+## Run once locally
+
+Use this before running the long-lived scheduler:
+
+```bash
+docker compose run --rm ytm-daily-drive python -m ytm_daily_drive --run-once --dry-run
+docker compose run --rm ytm-daily-drive python -m ytm_daily_drive --run-once
+```
+
+## Run on a daily schedule
+
+Start the service:
+
+```bash
+docker compose up -d --build
+```
+
+By default the scheduler runs at `0 6 * * *` in the timezone set in `config/settings.yaml`.
+
+## Notes
+
+- The scheduler runs inside the Python process using APScheduler, so there is no extra cron daemon in the container.
+- Nothing secret is committed to the repo.
+- If the target playlist does not exist yet, the app creates it.
+- If the playlist already exists, the app clears the existing items and replaces them with the new sequence.

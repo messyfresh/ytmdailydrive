@@ -1,0 +1,6 @@
+APScheduler<4.0,>=3.10
+PyYAML<7.0,>=6.0
+ytmusicapi<2.0,>=1.11
+
+[dev]
+pytest<9.0,>=8.0
