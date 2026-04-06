@@ -1,2 +1,0 @@
-[console_scripts]
-ytm-daily-drive = ytm_daily_drive.app:main
